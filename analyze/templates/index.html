@@ -1,0 +1,624 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/tempusdominus-datetime-picker/css/tempusdominus-bootstrap-4.min.css" />
+    <link rel="stylesheet" href="/static/css/circle_progress.css" />
+
+{% endblock style %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="text-center">智能分析平台</h1>
+    <hr>
+
+    <div id="data_collector">
+        <div class="row">
+        <div class="form-group form-inline col-sm-12 col-md-5 col-lg-3">
+            <label for="inputPassword" class="col-md-3 col-form-label">名称：</label>
+                <input type="text" class="form-control col-md-9 col-sm-12" id="action_name" placeholder="名称" required>
+        </div>
+        <div class="form-group form-inline col-sm-12 col-md-7 col-lg-3">
+            <label for="inputPassword" class="col-md-3 col-form-label">装机量：</label>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="equip_amount" placeholder="装机量 KW" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">KW</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group form-inline col-sm-12 col-md-12 col-lg-6">
+            <label for="inputPassword" class="col-md-2 col-form-label">分析周期：</label>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="input-group date col-md-6 col-sm-12" id="datetimepicker1" data-target-input="nearest">
+
+                        <input class="form-control datetimepicker-input" id="add_date_start" name="add_date_start"
+                               type="text" value="" required>
+                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker"
+                             size="30">
+                            <div class="input-group-text"><i class="fa fa-fw fa-calendar"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group date col-md-6 col-sm-12" id="datetimepicker2" data-target-input="nearest">
+
+                        <input class="form-control datetimepicker-input" id="add_date_end" name="add_date_end"
+                               type="text" value="" required>
+                        <div class="input-group-append" data-target="#datetimepicker2" data-toggle="datetimepicker"
+                             size="30">
+                            <div class="input-group-text"><i class="fa fa-fw fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <hr>
+
+    <div class="row"> <!-- 文件上传区域 -->
+
+        <div class="col-4">
+            <div class="card border-danger" style="margin: 10px;">
+                <div class="card-body">
+                    <h5 class="card-title">配置信息</h5>
+                    <a href="{% url 'download' %}?file_id=config_info" download="配置信息.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="config_info"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="config_info">
+                    </div>
+                    <div class="progress">
+                        <div id="config_info_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+                <div class="card-body">
+                    <h5 class="card-title">电站理论发电量</h5>
+                    <a href="{% url 'download' %}?file_id=power_amount" download="电站理论发电量.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="power_amount"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="power_amount">
+                    </div>
+                    <div class="progress">
+                        <div id="power_amount_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card  border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">气象站数据</h5>
+                    <a href="{% url 'download' %}?file_id=weather" download="气象站数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="weather"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="weather">
+                    </div>
+                    <div class="progress">
+                        <div id="weather_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">支路电能表数据</h5>
+                    <a href="{% url 'download' %}?file_id=branch" download="支路电能表数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="branch"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="branch">
+                    </div>
+                    <div class="progress">
+                        <div id="branch_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">汇流箱数据</h5>
+                    <a href="{% url 'download' %}?file_id=junction" download="汇流箱数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="junction"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="junction">
+                    </div>
+                    <div class="progress">
+                        <div id="junction_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">关口表数据</h5>
+                    <a href="{% url 'download' %}?file_id=gate" download="关口表数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="gate"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="gate">
+                    </div>
+                    <div class="progress">
+                        <div id="gate_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">组串式逆变器数据</h5>
+                    <a href="{% url 'download' %}?file_id=reverse" download="组串式逆变器数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="reverse"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="reverse">
+                    </div>
+                    <div class="progress">
+                        <div id="reverse_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">变压器数据</h5>
+                    <a href="{% url 'download' %}?file_id=group" download="变压器数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="group"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="group">
+                    </div>
+
+                    <div class="progress">
+                        <div id="group_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-info" style="margin: 10px;">
+
+                <div class="card-body">
+                    <h5 class="card-title">集中式逆变器数据</h5>
+                    <a href="{% url 'download' %}?file_id=transformer" download="集中式逆变器数据.xlsx"><i class="fas fa-cloud-download-alt"></i>模板下载</a>
+                    <div class="form-group">
+                        <label for="transformer"><i class="fas fa-cloud-upload-alt"></i>数据上传</label>
+                        <input type="file" class="form-control-file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="transformer">
+                    </div>
+                    <div class="progress">
+                        <div id="transformer_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div> <!-- end 文件上传区域 -->
+
+        <div class="text-center" id="btn_area">
+        <button id="btn_upload" class="btn btn-primary">提交分析</button>
+        <button id="btn_clear" class="btn btn-warning">清空重填</button>
+
+    </div>
+</div> <!-- end data collector-->
+
+    <div id="waiting_area" style="display: none;">
+        <p class="text-center">您的业务正在处理中，请耐心等待</p>
+        <div class="circle"></div>
+        <div class="circle-small"></div>
+        <div class="circle-big"></div>
+        <div class="circle-inner-inner"></div>
+        <div class="circle-inner"></div>
+    </div>
+    <div id="result_area" style="display: none;"></div>
+
+    <hr>
+
+    <div style="height: 20px;"></div>
+
+
+<div id="hint_modal" class="modal fade" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hint_modal_title">请注意</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="msg_content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script src="/static/moment.js/moment-with-locales.min.js"></script>
+    <script src="/static/tempusdominus-datetime-picker/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+    let user_id;
+    let task_id;
+    let area_data_collector = $('#data_collector');
+    let area_waiting = $('#waiting_area');
+    let area_result = $('#result_area');
+    const names = [
+        'config_info',     // 配置信息
+        'power_amount',    // 电站理论发电量
+        'weather',         // 气象站数据
+        'branch',          // 支路电能表数据
+        'junction',        // 汇流箱数据
+        'gate',            // 关口表数据
+        'reverse',         // 组串式逆变器数据
+        'group',           // 变压器数据
+        'transformer',     // 集中式逆变器数据
+
+    ];
+
+    const cn_names = {
+        'config_info': "配置信息",
+        'power_amount': "电站理论发电量",
+        'weather': "气象站数据",
+        'branch': "支路电能表数据",
+        'junction': "汇流箱数据",
+        'gate': "关口表数据",
+        'reverse': "组串式逆变器数据",
+        'group': "变压器数据",
+        'transformer': "集中式逆变器数据"
+    };
+
+    let upload_status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    moment.locale('zh-cn');
+    $.fn.datetimepicker.Constructor.Default = $.extend({}, $.fn.datetimepicker.Constructor.Default, {
+            icons: {
+                time: 'fa fa-fw fa-clock',
+                date: 'fa fa-fw fa-calendar',
+                up: 'fa fa-fw fa-arrow-circle-up',
+                down: 'fa fa-fw fa-arrow-circle-down',
+                previous: 'fa fa-fw fa-arrow-circle-left',
+                next: 'fa fa-fw fa-arrow-circle-right',
+                today: 'fa fa-fw fa-calendar-check-o',
+                clear: 'fa fa-fw fa-trash',
+                close: 'fa fa-fw fa-times'
+            },
+
+            });
+
+    $(function () {
+                $('#datetimepicker1').datetimepicker({
+                    locale: 'zh-cn',
+                    format: 'YYYY-M-D HH:mm:ss',
+                    defaultDate: moment().format('YYYY-M-D HH:mm:ss'),
+
+                });
+                $('#datetimepicker2').datetimepicker({
+                    locale: 'zh-cn',
+                    format: 'YYYY-M-D HH:mm:ss',
+                    defaultDate: moment().format('YYYY-M-D HH:mm:ss'),
+                });
+            });
+
+    function mute_all_progress_bar(  ) {
+        for (let i=0; i < names.length; i++){
+            let name = names[i];
+            let bar = $(`#${name}_progress`);
+            bar.hide();
+            bar.css('width', '0%');
+        }
+    }
+
+    function show_warning_msg( html_msg ) {
+        let modal = $('#hint_modal');
+        let msg_label = $('#msg_content');
+        msg_label.html(html_msg);
+        modal.modal('show');
+    }
+
+    function get_user_id(  ) {
+        user_id = localStorage.getItem('user_id');
+        task_id = localStorage.getItem('task_id');
+        if (user_id === null){
+            localStorage.removeItem('task_id');
+            $.ajax({
+                url: '/get_user_id',
+                type: 'get',
+                success: function( result ) {
+                    user_id = result.user_id;
+                    console.log(user_id);
+                    localStorage.setItem('user_id', user_id)
+                    get_task_id();
+                }
+            })
+        } else {
+            get_task_id();
+        }
+    }
+
+    function get_task_id(  ) {
+        task_id = localStorage.getItem('task_id');
+        if (task_id === null){
+            $.ajax({
+                url: `/get_task_id/${user_id}`,
+                type: 'get',
+                success: function( result ) {
+                    task_id = result.task_id;
+                    console.log(task_id);
+                    localStorage.setItem('task_id', task_id)
+                }
+            })
+        } else {
+            check_task_status();
+        }
+    }
+
+    function _(el) {
+        return document.getElementById(el);
+    }
+
+    function upload_file(name){
+        let cn_name = cn_names[name];
+        let bar = $(`#${name}_progress`);
+        bar.show();
+        bar.removeClass('bg-danger');
+        bar.removeClass('progress-bar-animated');
+        bar.addClass('progress-bar-animated');
+        bar.css('width', '0%');
+        bar.text('0%');
+
+        function progressHandler(event){
+            var percent = (event.loaded / event.total) * 100;
+            bar.css('width', percent+"%");
+            bar.text(percent+"%");
+        }
+
+        function completeHandler(){
+            bar.css('width', 100+"%");
+            bar.removeClass('progress-bar-animated');
+            bar.text('数据上传成功');
+            upload_status[names.indexOf(name)] = 1;
+            let s = upload_status.reduce((a, b) => a+b, 0);
+            if (s === 9){
+                console.log('all done');
+                submit_task();
+            }
+
+        }
+
+        function errorHandler(event){
+            bar.addClass('bg-danger');
+            bar.removeClass('progress-bar-animated');
+            show_warning_msg(`上传${cn_name}出现故障`)
+        }
+
+        function abortHandler(event) {
+            bar.css('width', 0+"%");
+        }
+
+
+
+        let file = _(name).files[0];
+        if (file === undefined){
+            bar.css('width', '100%');
+            bar.text('没有选择 Excel 文件');
+            bar.removeClass('progress-bar-animated');
+            bar.addClass('bg-danger');
+            if (name !== 'config_info') {
+                upload_status[names.indexOf(name)] = 1;
+            }
+            else {
+                show_warning_msg('配置信息必须填写');
+            }
+
+            return
+        }
+
+        let form_data = new FormData();
+        console.log(name, file);
+        form_data.append('file', file);
+        form_data.append('user_id', user_id);
+        form_data.append('task_id', task_id);
+        form_data.append('name', name);
+        let ajax = new XMLHttpRequest();
+        ajax.upload.addEventListener("progress", progressHandler, false);
+        ajax.addEventListener("load", completeHandler, false);
+        ajax.addEventListener("error", errorHandler, false);
+        ajax.addEventListener("abort", abortHandler, false);
+        ajax.open("POST", "/upload");
+        ajax.send(form_data);
+    }
+
+    function check_task_status( _id, callback ) {
+        if (_id === undefined){
+            _id = task_id;
+        }
+        $.ajax({
+            url: `/check_status/${_id}`,
+            type: 'get',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    if (result.code === 0) {
+                        area_data_collector.show();
+                        area_waiting.hide();
+                        area_result.hide();
+                    }
+
+                    if (result.code === 1) {
+                        area_data_collector.hide();
+                        area_waiting.hide();
+                        area_result.show();
+
+                        area_result.html(`
+                        <p class="text-center">您的业务已经处理好</p>
+                        <p class="text-center">
+                        <a href="/download?file_id=${task_id}">结果下载</a> |
+                        <button class="btn btn-primary" onclick="ready_to_new_task()">开始新的分析</button>
+                        </p>
+                        `)
+                    }
+
+                    if (result.code === 2){
+                        area_data_collector.hide();
+                        area_waiting.show();
+                        area_result.hide();
+
+                        setTimeout(function(  ) {
+                            check_task_status(_id, callback)
+                        },
+                        2000 // 每 2 s 更新一次
+                        )
+                    }
+
+                    if (result.code === 3) {
+                        area_data_collector.hide();
+                        area_waiting.hide();
+                        area_result.show();
+                        area_result.html(
+                            `<p class="text-center">很抱歉，业务失败</p><p class="text-center"><button class="btn btn-primary" onclick="ready_to_new_task()">开始新的分析</button> </p>
+                            `
+                        )
+                    }
+
+                    if (callback !== undefined ){
+                        callback(result.code);
+                    }
+
+                }
+            }
+        });
+
+    }
+
+    function submit_files(){
+        for (let i=0; i < names.length; i++){
+            let name = names[i];
+            upload_file(name);
+        }
+    }
+
+    $('#btn_upload').on('click', function(  ) {
+        console.log('clicked');
+        /*
+        if (user_id === null|| user_id === undefined|| task_id === null || task_id === undefined){
+            return window.location.reload(true);
+        }
+
+         */
+
+        let task_name = $('#action_name').val();
+        let equip_amount = $('#equip_amount').val();
+        let start = $('#add_date_start').val();
+        let end = $('#add_date_end').val();
+
+        if (task_name === '' || task_name.length > 128){
+            return show_warning_msg('请填规范写任务名称， 不能留空，而且不能超过128个字符')
+        }
+        if (equip_amount === '') {
+            return show_warning_msg('装机量必须填写')
+        }
+        if (moment(start, 'YYYY-M-D HH:mm:ss').isValid() === false){
+            return show_warning_msg('请规范填写分析周期开始时间')
+        }
+        if (moment(end, 'YYYY-M-D HH:mm:ss').isValid() === false){
+            return show_warning_msg('请规范填写分析周期结束时间')
+        }
+
+        submit_files();
+
+
+    });
+
+    function submit_task (){
+        let task_name = $('#action_name').val();
+        let equip_amount = $('#equip_amount').val();
+        let start = $('#add_date_start').val();
+        let end = $('#add_date_end').val();
+        $.ajax({
+            url: 'start_process',
+            data: {
+                name: task_name,
+                load: equip_amount,
+                start: start,
+                end: end,
+                user_id: user_id,
+                task_id: task_id
+            },
+            type: 'post',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    console.log('submit_task result', result);
+                    check_task_status();
+                }
+            }
+        })
+    }
+
+
+    function reInitAllFields(  ) {
+        mute_all_progress_bar();
+        for (let i=0; i < names.length; i ++ ){
+            let name = names[i];
+            $(`#${name}`).val('');
+        }
+    }
+
+    $('#btn_clear').on('click', function(  ) {
+        let answer = confirm('确定要清空所有的文件吗？');
+        if (answer === false) {
+            return
+        }
+        reInitAllFields();
+    });
+
+     function ready_to_new_task(  ) {
+        localStorage.removeItem('task_id');
+        window.location.reload(true);
+    }
+
+
+
+    $(document).ready(function(  ) {
+        get_user_id();
+        // get_task_id();
+        mute_all_progress_bar();
+        // check_task_status();
+    });
+
+
+    </script>
+{% endblock %}
