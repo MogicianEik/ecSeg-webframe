@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/baguetteBox.js/baguetteBox.min.css">
+    <style>
+    .img-preview{margin-top: 10px; margin-bottom: 10px;}
+    .del-btn{margin-top: auto; margin-bottom: auto;}
+
+.container.gallery-container {
+    background-color: #fff;
+    color: #35373a;
+    min-height: 20vh;
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.gallery-container h4 {
+    text-align: center;
+    margin-top: 20px;
+    font-family: 'Droid Sans', sans-serif;
+    font-weight: bold;
+}
+
+.gallery-container p.page-description {
+    text-align: center;
+    max-width: 800px;
+    margin: 15px auto;
+    color: #888;
+    font-size: 18px;
+}
+
+.tz-gallery {
+    padding: 40px;
+}
+
+.tz-gallery .lightbox img {
+    width: 100%;
+    margin-bottom: 30px;
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+}
+
+
+.tz-gallery .lightbox img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+}
+
+.tz-gallery img {
+    border-radius: 4px;
+}
+
+.baguetteBox-button {
+    background-color: transparent !important;
+}
+
+
+@media(max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .container.gallery-container {
+        border-radius: 0;
+    }
+}
+
+    </style>
+{% endblock style %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">View Task {{ task.id }} - {{ task.name_en}}</h1>
+    <hr>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tbody>
+            <tr><td>Name:</td><td>{{ task.name_en }}</td></tr>
+            <tr><td>Status:</td><td>{{ task.status_en }}</td></tr>
+            {% if task.status == 0 %}
+            <tr>
+                <td>Option:</td>
+                <td>
+                    <a class="btn btn-warning" href="{% url 'analyze:edit_task' task_id=task.id %}"><i class="fas fa-edit"></i></a>
+                     <button class="btn btn-success" onclick="startProcess({{ task.id }})"><i class="fas fa-paper-plane"></i></button>
+                </td>
+            </tr>
+            {% endif %}
+            </tbody>
+        </table>
+        </div>
+</div>
+
+</div>
+    {% if task.status == 2 %}
+    <div class="container gallery-container">
+    <h4>Result Labels</h4>
+    <p class="page-description text-center">Labels Generated
+        {% if labels %}
+        <a href="{% url 'analyze:batch_download'  task_id=task.id%}"><i class="fas fa-download"></i> Batch Download</a></p>
+            {% endif %}
+    <div class="tz-gallery">
+        <div class="row">
+            {% for label in labels %}
+            <div class="col-sm-6 col-md-4">
+                <a class="lightbox" href="{{ label.url }}">
+                    <img class="img-fluid" src="{{ label.url }}" alt="{{ label.name }}">
+                </a>
+            </div>
+                {% empty %}
+                <div class="card-text">No Results Found</div>
+            {% endfor %}
+        </div>
+    </div>
+    </div>
+    {% endif %}
+
+     <div class="container gallery-container">
+    <h4>Source Images</h4>
+    <p class="page-description text-center">Images Bellow Are Used to Analyze</p>
+    <div class="tz-gallery">
+        <div class="row">
+            {% for image in task.image_set.all %}
+            <div class="col-sm-6 col-md-4">
+                <a class="lightbox" href="{{ image.image.url }}">
+                    <img class="img-fluid" src="{{ image.image.url }}" alt="{{ image.image.name }}">
+                </a>
+            </div>
+                {% empty %}
+        <div class="card-text">No Images, Please upload</div>
+            {% endfor %}
+        </div>
+    </div>
+    </div>
+
+    <div id="hint_modal" class="modal fade" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hint_modal_title">Attention</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="msg_content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script src="/static/baguetteBox.js/baguetteBox.min.js"></script>
+    <script>
+    let sta = parseInt('{{ task.status }}');
+    baguetteBox.run('.tz-gallery', {
+        //animation: 'fadeIn',
+        captions: function(element) {
+        return element.getElementsByTagName('img')[0].alt;
+    }
+    });
+
+    function show_warning_msg( html_msg ) {
+        let modal = $('#hint_modal');
+        let msg_label = $('#msg_content');
+        msg_label.html(html_msg);
+        modal.modal('show');
+    }
+
+    function startProcess( task_id ) {
+        $.ajax({
+            url: `/start_process/${task_id}`,
+            type: 'get',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    console.log('start process success');
+
+                } else {
+                    show_warning_msg(result.msg)
+                }
+            }
+        })
+    }
+
+    function checkStatus() {
+        $.ajax({
+            url: '{% url "analyze:check_task_status" task_id=task.id %}',
+            type: 'get',
+            success: function (result) {
+                if (result.status === 'success'){
+
+                    if (sta === 1 &&  result.code !== 1) {
+                        return window.location.assign('');
+                    }
+
+                    if (result.code === 1){
+                        setTimeout(checkStatus, 2000);
+                    }
+
+
+                }
+            }
+        })
+    }
+
+    $(document).ready(function () {
+        checkStatus();
+    })
+
+    </script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'bootstrap4/bootstrap4.html' %}
+
+{% block bootstrap4_title %}
+    {% if title %}
+        {{ title }}
+    {% else %}
+        Ai Analyzer
+    {% endif %}
+{% endblock bootstrap4_title %}
+
+{% block bootstrap4_extra_head %}
+    {% block metas %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="wap-font-scale" content="no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    {% endblock %}
+    {% block style %}{% endblock style %}
+{% endblock bootstrap4_extra_head %}
+
+{% block bootstrap4_before_content %}
+<header>{% block nav %}{% endblock nav %}</header>
+{% block messages %}{% endblock messages %}
+{% block ads %}{% endblock ads %}
+{% endblock %}
+
+{% block bootstrap4_content %}{% block content %}{% endblock content %}{% endblock %}
+{% block bootstrap4_after_content %}{% block footer %}{% endblock footer %}{% endblock %}
+
+
+{% block bootstrap4_extra_script %}{% block script %}{% endblock %}{% endblock %}
+
+
+

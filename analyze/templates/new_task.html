@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="/static/dropzone5.5/dropzone.min.css">
+    <style>
+    .dropzone{border: 2px dashed #0087F7; min-height: 400px;}
+    .img-preview{margin-top: 10px; margin-bottom: 10px;}
+    .del-btn{margin-top: auto; margin-bottom: auto;}
+    .del-btn-a{margin-top: 10px; margin-bottom: 10px;}
+    </style>
+{% endblock style %}
+
+{% block content %}
+<div class="container">
+<h1 class="text-center">{{ header }}</h1>
+    <hr>
+<div id="img_preview" class="dropzone-previews"></div>
+<div >
+    {% csrf_token %}
+    <input type="hidden" name="task" value="{{ task.id }}">
+    <div class="form-group">
+        <label for="name">Task Name:</label>
+        <div class="row">
+            <div class="col-10">
+                <input type="text" id="name" name="name" class="form-control" required value="{{ task.name }}">
+                <span id="name_display" hidden="hidden">{{ task.name }}</span>
+            </div>
+            <div class="col-2 del-btn">
+                <button role="button" type="button" class="btn btn-primary" id="btn_check"><i class="fas fa-check"></i></button>
+                <button role="button" type="button" class="btn btn-warning" id="btn_edit" hidden="hidden"><i class="fas fa-edit"></i></button>
+            </div>
+        </div>
+
+    </div>
+    <div class="form-group">
+        {% for image in task.image_set.all %}
+            <div class="card img-preview border-primary">
+            <div class="row">
+            <div class="col-10">
+                <img class="img-fluid card-img" src="{{ image.image.url }}" alt="{{ image.image.name }}">
+            </div>
+            <div class="col-2 del-btn text-center">
+                <button role="button" class="btn btn-danger del-btn-a" onclick="deleteImage({{ image.id }})"><i class="fas fa-trash"></i></button>
+                <a href="{{ image.image.url }}" class="btn btn-primary del-btn-a" download="{{ image.image.name }}"><i class="fas fa-download"></i></a>
+            </div>
+            </div>
+            </div>
+
+        {% endfor %}
+    </div>
+    <div class="form-group">
+    <label for="drop-zone">Upload {% if task.image_set.count %}New{% endif %} Pictures:</label>
+    <div class="row">
+        <div class="col-10"><div id="drop-zone" class="dropzone"></div></div>
+
+        <div class="col-2 del-btn"><button id="submit-all" type="button" class="btn btn-primary"><i class="fas fa-upload"></i> Upload </button></div>
+    </div>
+
+    </div>
+
+<div class="form-group">
+    <button class="btn btn-success" onclick="startProcess({{ task.id }})"><i class="fas fa-paper-plane"></i> Start</button>
+    <a href="{% url 'analyze:list_task' %}" class="btn btn-info"><i class="fas fa-list"></i> List</a>
+</div>
+</div>
+</div>
+
+<div id="hint_modal" class="modal fade" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hint_modal_title">Attention</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="msg_content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+
+
+{% block script %}
+    {{ block.super }}
+    <script src="/static/dropzone5.5/dropzone.min.js"></script>
+    <script>
+    let csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val();
+    let task = $('input[name="task"]').val();
+    let btn_check = $('#btn_check');
+    let btn_edit = $('#btn_edit');
+    let name_edit = $('#name');
+    let name_display = $('#name_display');
+
+    btn_check.on('click', function(  ) {
+        let name = name_edit.val();
+        if (name.length < 3) {
+            show_warning_msg('Task name should be 3-128 chars')
+        } else {
+            $.ajax({
+                url: '{% url "analyze:update_task_name" task_id=task.id %}'+`?name=${name}`,
+                type: 'get',
+                success: function( result ) {
+                    if (result.status === 'success'){
+                        name_display.text(name);
+
+                        name_display.removeAttr('hidden');
+                        btn_edit.removeAttr('hidden');
+
+                        name_edit.prop('hidden', true);
+                        btn_check.prop('hidden', true)
+                    }
+
+                    if (result.status === 'error'){
+                        show_warning_msg(result.msg);
+                    }
+                }
+            })
+
+
+        }
+    });
+    btn_edit.on('click', function(  ) {
+        name_edit.removeAttr('hidden');
+        btn_check.removeAttr('hidden');
+        btn_edit.prop('hidden', true);
+        name_display.prop('hidden', true)
+    });
+
+
+    console.log(csrfmiddlewaretoken, task);
+
+    Dropzone.options.dropZone = {
+        addRemoveLinks: true,
+        autoProcessQueue: false,
+        url: '/image_upload',
+        withCredentials: true,
+        uploadMultiple: false,
+        parallelUploads: 30,
+        paramName: "image", // The name that will be used to transfer the file
+        maxFilesize: 10, // MB
+        acceptedFiles: ".tif",  // image/* -- allow all kinds of images
+        maxFiles: 30,
+        dictDefaultMessage: `Drop files here or click to chose images.<br>You can upload 10 images at most once.<br>Then click <kbd>Upload</kbd> btn to upload`, // message display on drop area
+        dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+        dictInvalidFileType: "You can't upload files of this type.",
+        dictFileTooBig: "File is too big {{filesize}}. Max filesize: {{maxFilesize}}MiB.",
+        dictResponseError: "Server error: {{statusCode}}",
+        dictMaxFilesExceeded: "You can't upload any more files.",
+        dictCancelUpload: "Cancel upload",
+        dictRemoveFile: "Remove file",
+        dictCancelUploadConfirmation: "You really want to delete this file?",
+        dictUploadCanceled: "Upload canceled",
+
+        init: function() {
+            let  dz = this;
+            let num = 0;
+            let count = 0;
+
+          this.on('addedfile', function (file) {
+              console.log('add', file);
+              num += 1;
+          });
+
+          this.on('removedfile', function (file) {
+              console.log('remove', file);
+              num -= 1;
+          });
+
+          this.on('sending', function (data, xhr, formData) {
+              formData.append('csrfmiddlewaretoken', csrfmiddlewaretoken);
+              formData.append('task', task)
+          });
+
+          this.on('success', function (files, response) {
+              console.log('success', response);
+          });
+
+          this.on('error', function (files, response) {
+              console.log('error', response);
+          });
+
+          this.on('complete', function (files, response) {
+              console.log('complete', response);
+              count += 1;
+              if (count === num){
+                  console.log('total');
+                  window.location.assign('')
+              }
+
+          });
+
+          let btn = $('#submit-all');
+
+          btn.on('click', function () {
+              if (num > 0){
+                  console.log('clicked');
+                  dz.processQueue();
+              } else {
+                  show_warning_msg('no images added yet')
+              }
+
+          })
+
+        },
+    };
+
+    function deleteImage( image_id ) {
+        console.log('delete', image_id);
+        $.ajax({
+            url: '{% url "analyze:del_image" %}'+`?id=${image_id}`,
+            type: 'get',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    window.location.assign('')
+                }
+            }
+        })
+    }
+
+    function show_warning_msg( html_msg ) {
+        let modal = $('#hint_modal');
+        let msg_label = $('#msg_content');
+        msg_label.html(html_msg);
+        modal.modal('show');
+    }
+
+    function startProcess( task_id ) {
+        $.ajax({
+            url: `/start_process/${task_id}`,
+            type: 'get',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    console.log('start process success');
+                    window.location.assign(`/view_task/${task_id}`)
+
+                } else {
+                    show_warning_msg(result.msg)
+                }
+            }
+        })
+    }
+
+    </script>
+{% endblock script %}

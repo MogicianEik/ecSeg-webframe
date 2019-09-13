@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block content %}
+    <div class="container">
+    <h1 class="text-center">Task List</h1>
+        <hr>
+    <div class="card">
+        <table class="table table-hover table-striped table-bordered">
+            <thead class="text-center">
+            <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Option</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for task in task_ls %}
+                <tr class="text-center">
+                <td>{{ task.id }}</td>
+                <td>{{ task.name_en }}</td>
+                <td>{{ task.status_en }}</td>
+                <td>
+                    {% if task.status == 0 %}
+                    <a class="btn btn-warning" href="{% url 'analyze:edit_task' task_id=task.id %}"><i class="fas fa-edit"></i></a>
+                    <button class="btn btn-success" onclick="startProcess({{ task.id }})"><i class="fas fa-paper-plane"></i></button>
+                    {% endif %}
+                     <a class="btn btn-primary" href="{% url 'analyze:view_task' task_id=task.id %}"><i class="fas fa-eye"></i></a>
+                </td>
+                </tr>
+            {% empty %}
+            {% endfor %}
+
+            </tbody>
+        </table>
+        <hr>
+    {% bootstrap_pagination task_ls %}
+    </div>
+    </div>
+
+
+    <div id="hint_modal" class="modal fade" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hint_modal_title">Attention</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="msg_content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+    <script>
+     function show_warning_msg( html_msg ) {
+        let modal = $('#hint_modal');
+        let msg_label = $('#msg_content');
+        msg_label.html(html_msg);
+        modal.modal('show');
+    }
+
+    function startProcess( task_id ) {
+        $.ajax({
+            url: `/start_process/${task_id}`,
+            type: 'get',
+            success: function( result ) {
+                if (result.status === 'success'){
+                    console.log('start process success');
+                    window.location.assign(`/view_task/${task_id}`)
+
+                } else {
+                    show_warning_msg(result.msg)
+                }
+            }
+        })
+    }
+    </script>
+{% endblock %}
