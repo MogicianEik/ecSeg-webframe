@@ -22,5 +22,6 @@ Important notice:
 For using ecSeg-webframe normally, please revise 2 lines inside the "time_consuming_task" function of the script "ai_function.py" according to notes in the script to make sure a direct python path is provided.
 
 Here is a quick demo of how this webframe works:
+
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/FnQXlUfcdYg/0.jpg)](http://www.youtube.com/watch?v=FnQXlUfcdYg)
 
