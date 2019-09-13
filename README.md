@@ -1,7 +1,7 @@
 # ecSeg-webframe
 The server-ready webframe work of ecSeg written by Yichi Zhang (MogicianEik, yiz370@ucsd.edu).
 
-ecSeg-webframe is a python3-Django based webframe and is an extension of (ecSeg)[https://github.com/UCRajkumar/ecSeg] ,Semantic Segmentation of Metaphase Images containing Extrachromosomal DNA
+ecSeg-webframe is a python3-Django based webframe and is an extension of [ecSeg](https://github.com/UCRajkumar/ecSeg), Semantic Segmentation of Metaphase Images containing Extrachromosomal DNA
 Utkrisht Rajkumar, Kristen Turner, Jens Luebeck, Viraj Deshpande, Manmohan Chandraker, Paul Mischel, and Dr. Vineet Bafna.
 
 There are two major brances:
