@@ -5,7 +5,7 @@ sqlparse==0.3.0
 django-bootstrap4==1.0.1
 Keras==2.2.4
 numpy==1.16.2
-tensorflow==1.13.1
+tensorflow==1.15.4
 opencv-python==4.1.0.25
 scikit-image==0.15.0
 seaborn==0.9.0
