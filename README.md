@@ -12,14 +12,16 @@ For anyone who firstly use the webframe: Pyhton 3 is required. (3.5 for running 
 ```
 git clone https://github.com/MogicianEik/ecSeg-webframe
 cd ecSeg-webframe
-pip3 install -r requirements.txt (ecSeg is incoporated and there is no need to download/install ecSeg again)
+pip3 install -r requirements.txt (ecSeg is incoporated and there is no need to download/install ecSeg again) OR use the conda environment yml file attachted to build a stable environment.
 python3 manage.py makemigrations analyze
 python3 manage.py migrate analyze
 python3 manage.py migrate
 ```
+**Before running 'manage.py runserver', make sure you open analyze/ai_function.py file and edit the ecSeg working directory and python3 path**
 
 Important notice:
 For using ecSeg-webframe normally, please revise 2 lines inside the "time_consuming_task" function of the script "ai_function.py" according to notes in the script to make sure a direct python path is provided.
+
 
 Here is a quick demo of how this webframe works:
 
